@@ -19,10 +19,7 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
-
 	<dependencies>
-
-		<!-- EXISTING (UNCHANGED) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -57,23 +54,15 @@
 			<version>7.8.0</version>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- 🔽🔽🔽 ADDED DEPENDENCIES (DO NOT REMOVE) 🔽🔽🔽 -->
-
-		<!-- Spring Security (needed for @EnableWebSecurity, HttpSecurity, etc.) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-
-		<!-- H2 DB (prevents datasource errors during tests) -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
-		<!-- Servlet API (needed for HttpServlet, WebServlet) -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>

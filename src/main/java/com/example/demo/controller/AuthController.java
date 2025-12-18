@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.*;
-import com.example.demo.dto.*;
+import com.example.demo.dto.AuthRequestDto;
+import com.example.demo.dto.AuthResponseDto;
 
 @RestController
 @RequestMapping("/auth")
