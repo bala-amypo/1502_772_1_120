@@ -1,3 +1,13 @@
+package com.example.demo.service.impl;
+
+import com.example.demo.entity.KeyExemption;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.KeyExemptionRepository;
+import com.example.demo.service.KeyExemptionService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
 @Service
 public class KeyExemptionServiceImpl implements KeyExemptionService {
 
@@ -12,9 +22,7 @@ public class KeyExemptionServiceImpl implements KeyExemptionService {
     }
 
     public KeyExemption update(Long id, KeyExemption exemption) {
-        KeyExemption existing = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("KeyExemption not found"));
-        exemption.setId(existing.getId());
+        getById(id);
         return repository.save(exemption);
     }
 
