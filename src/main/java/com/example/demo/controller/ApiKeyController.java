@@ -1,3 +1,11 @@
+package com.example.demo.controller;
+
+import com.example.demo.entity.ApiKey;
+import com.example.demo.service.ApiKeyService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/api-keys")
 public class ApiKeyController {
@@ -19,7 +27,7 @@ public class ApiKeyController {
     }
 
     @GetMapping("/{id}")
-    public ApiKey get(@PathVariable Long id) {
+    public ApiKey getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
