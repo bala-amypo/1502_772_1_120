@@ -1,3 +1,4 @@
+package com.example.demo.service;
 public interface QuotaPlanService {
     QuotaPlan create(QuotaPlan plan);
     QuotaPlan update(Long id, QuotaPlan plan);

@@ -1,3 +1,4 @@
+package com.example.demo.service;
 public interface KeyExemptionService {
     KeyExemption create(KeyExemption exemption);
     KeyExemption update(Long id, KeyExemption exemption);

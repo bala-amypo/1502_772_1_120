@@ -1,3 +1,4 @@
+package com.example.demo.service;
 public interface ApiKeyService {
     ApiKey create(ApiKey apiKey);
     ApiKey update(Long id, ApiKey apiKey);

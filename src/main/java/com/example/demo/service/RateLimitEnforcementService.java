@@ -1,3 +1,4 @@
+package com.example.demo.service;
 public interface RateLimitEnforcementService {
     RateLimitEnforcement create(RateLimitEnforcement enforcement);
     RateLimitEnforcement getById(Long id);

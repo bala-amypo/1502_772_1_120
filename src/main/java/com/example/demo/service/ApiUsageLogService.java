@@ -1,3 +1,4 @@
+package com.example.demo.service;
 public interface ApiUsageLogService {
     ApiUsageLog create(ApiUsageLog log);
     ApiUsageLog getById(Long id);
