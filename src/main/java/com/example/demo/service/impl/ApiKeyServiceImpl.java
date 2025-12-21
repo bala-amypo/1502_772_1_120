@@ -1,3 +1,11 @@
+package com.example.demo.service.impl;
+
+import com.example.demo.entity.ApiKey;
+import com.example.demo.repository.ApiKeyRepository;
+import com.example.demo.service.ApiKeyService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ApiKeyServiceImpl implements ApiKeyService {
@@ -13,15 +21,11 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     }
 
     public ApiKey update(Long id, ApiKey apiKey) {
-        ApiKey existing = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ApiKey not found"));
-        apiKey.setId(existing.getId());
         return repository.save(apiKey);
     }
 
     public ApiKey getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ApiKey not found"));
+        return repository.findById(id).orElse(null);
     }
 
     public List<ApiKey> getAll() {
