@@ -7,37 +7,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthService service;
+    private final AuthService authService;
 
-    public AuthController(AuthService service) {
-        this.service = service;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping
     public UserAccount create(@RequestBody UserAccount user) {
-        return service.create(user);
-    }
-
-    @PutMapping("/{id}")
-    public UserAccount update(@PathVariable Long id, @RequestBody UserAccount user) {
-        return service.update(id, user);
-    }
-
-    @GetMapping("/{id}")
-    public UserAccount getById(@PathVariable Long id) {
-        return service.getById(id);
+        return authService.create(user);
     }
 
     @GetMapping
     public List<UserAccount> getAll() {
-        return service.getAll();
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+        return authService.getAll();
     }
 }
