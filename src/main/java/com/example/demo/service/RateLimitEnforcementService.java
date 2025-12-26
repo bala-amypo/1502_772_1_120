@@ -8,9 +8,11 @@ public interface RateLimitEnforcementService {
 
     RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement);
 
-    RateLimitEnforcement getById(Long id);
+    RateLimitEnforcement getEnforcementById(long id);
+
+    List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId);
 
     List<RateLimitEnforcement> getAll();
 
-    void delete(Long id);
+    void delete(long id);
 }

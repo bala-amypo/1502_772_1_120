@@ -27,9 +27,14 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     }
 
     @Override
-    public RateLimitEnforcement getById(Long id) {
+    public RateLimitEnforcement getEnforcementById(long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
+    }
+
+    @Override
+    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
+        return repository.findByApiKey_Id(apiKeyId);
     }
 
     @Override
@@ -38,7 +43,7 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(long id) {
         repository.deleteById(id);
     }
 }
