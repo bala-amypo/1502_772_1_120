@@ -18,16 +18,26 @@ public class RateLimitEnforcementController {
 
     @PostMapping
     public RateLimitEnforcement create(@RequestBody RateLimitEnforcement enforcement) {
-        return service.create(enforcement);
+        return service.createEnforcement(enforcement);
     }
 
     @GetMapping("/{id}")
-    public RateLimitEnforcement getById(@PathVariable Long id) {
-        return service.getById(id);
+    public RateLimitEnforcement getById(@PathVariable long id) {
+        return service.getEnforcementById(id);
     }
 
-    @GetMapping("/key/{apiKeyId}")
-    public List<RateLimitEnforcement> getByApiKey(@PathVariable Long apiKeyId) {
-        return service.getByApiKey(apiKeyId);
+    @GetMapping("/key/{keyId}")
+    public List<RateLimitEnforcement> getByKey(@PathVariable long keyId) {
+        return service.getEnforcementsForKey(keyId);
+    }
+
+    @GetMapping
+    public List<RateLimitEnforcement> getAll() {
+        return service.getAll();
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable long id) {
+        service.delete(id);
     }
 }
