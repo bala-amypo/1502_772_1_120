@@ -6,11 +6,13 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.ApiUsageLogRepository;
 import com.example.demo.service.ApiUsageLogService;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+@Service
 public class ApiUsageLogServiceImpl implements ApiUsageLogService {
 
     private final ApiUsageLogRepository repo;
@@ -21,6 +23,7 @@ public class ApiUsageLogServiceImpl implements ApiUsageLogService {
         this.apiKeyRepo = apiKeyRepo;
     }
 
+    @Override
     public ApiUsageLog logUsage(ApiUsageLog log) {
         apiKeyRepo.findById(log.getApiKey().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
@@ -31,21 +34,22 @@ public class ApiUsageLogServiceImpl implements ApiUsageLogService {
         return repo.save(log);
     }
 
+    @Override
     public List<ApiUsageLog> getUsageForApiKey(long apiKeyId) {
         return repo.findByApiKey_Id(apiKeyId);
     }
 
+    @Override
     public List<ApiUsageLog> getUsageForToday(long apiKeyId) {
         Instant start = Instant.now().truncatedTo(ChronoUnit.DAYS);
         Instant end = start.plus(1, ChronoUnit.DAYS);
-
         return repo.findForKeyBetween(apiKeyId, start, end);
     }
 
+    @Override
     public int countRequestsToday(long apiKeyId) {
         Instant start = Instant.now().truncatedTo(ChronoUnit.DAYS);
         Instant end = start.plus(1, ChronoUnit.DAYS);
-
         return repo.countForKeyBetween(apiKeyId, start, end);
     }
 }
