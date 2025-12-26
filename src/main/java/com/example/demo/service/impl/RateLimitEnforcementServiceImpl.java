@@ -6,6 +6,7 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,13 +17,14 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     private final RateLimitEnforcementRepository repository;
     private final ApiKeyRepository apiKeyRepository;
 
-    // Constructor used by Spring
+    // ✅ THIS is the constructor Spring must use
+    @Autowired
     public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repository) {
         this.repository = repository;
         this.apiKeyRepository = null;
     }
 
-    // Constructor used by TESTS
+    // ✅ This constructor is ONLY for tests
     public RateLimitEnforcementServiceImpl(
             RateLimitEnforcementRepository repository,
             ApiKeyRepository apiKeyRepository
