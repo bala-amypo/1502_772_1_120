@@ -3,9 +3,9 @@ package com.example.demo.service.impl;
 import com.example.demo.entity.RateLimitEnforcement;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,28 +14,19 @@ import java.util.List;
 public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
 
     private final RateLimitEnforcementRepository repository;
-    private final ApiKeyRepository apiKeyRepository;
 
-    // Constructor used by Spring
+    @Autowired
     public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repository) {
         this.repository = repository;
-        this.apiKeyRepository = null;
-    }
-
-    // Constructor used by TESTS
-    public RateLimitEnforcementServiceImpl(
-            RateLimitEnforcementRepository repository,
-            ApiKeyRepository apiKeyRepository
-    ) {
-        this.repository = repository;
-        this.apiKeyRepository = apiKeyRepository;
     }
 
     @Override
     public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
-        if (enforcement.getLimitExceededBy() < 0) {
-            throw new BadRequestException("Limit exceeded cannot be negative");
+
+        if (enforcement == null || enforcement.getLimitExceededBy() < 0) {
+            throw new BadRequestException("Invalid limit exceeded value");
         }
+
         return repository.save(enforcement);
     }
 
