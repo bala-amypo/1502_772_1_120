@@ -1,7 +1,8 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.entity.RateLimitEnforcement;
-import com.example.demo.repository.ApiKeyRepository;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
 import org.springframework.stereotype.Service;
@@ -9,28 +10,35 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class RateLimitEnforcementServiceImpl
-        implements RateLimitEnforcementService {
+public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
 
-    private final RateLimitEnforcementRepository repo;
-    private final ApiKeyRepository keyRepo;
+    private final RateLimitEnforcementRepository repository;
 
-    public RateLimitEnforcementServiceImpl(
-            RateLimitEnforcementRepository repo,
-            ApiKeyRepository keyRepo) {
-        this.repo = repo;
-        this.keyRepo = keyRepo;
+    public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repository) {
+        this.repository = repository;
     }
 
-    public RateLimitEnforcement createEnforcement(RateLimitEnforcement e) {
-        return repo.save(e);
+    @Override
+    public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
+        if (enforcement.getLimitExceededBy() < 0) {
+            throw new BadRequestException("Limit exceeded cannot be negative");
+        }
+        return repository.save(enforcement);
     }
 
-    public RateLimitEnforcement getEnforcementById(long id) {
-        return repo.findById(id).orElse(null);
+    @Override
+    public RateLimitEnforcement getById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
     }
 
-    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
-        return repo.findByApiKey_Id(apiKeyId);
+    @Override
+    public List<RateLimitEnforcement> getAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public void delete(Long id) {
+        repository.deleteById(id);
     }
 }
