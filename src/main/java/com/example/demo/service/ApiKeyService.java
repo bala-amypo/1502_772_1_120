@@ -4,10 +4,9 @@ import com.example.demo.entity.ApiKey;
 import java.util.List;
 
 public interface ApiKeyService {
-
     ApiKey createApiKey(ApiKey key);
     ApiKey getApiKeyById(long id);
     ApiKey getApiKeyByValue(String value);
-    void deactivateApiKey(long id);
     List<ApiKey> getAllApiKeys();
+    void deactivateApiKey(long id);
 }
