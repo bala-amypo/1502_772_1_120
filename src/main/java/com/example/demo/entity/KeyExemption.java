@@ -1,10 +1,9 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
-@Table(name = "key_exemptions")
 public class KeyExemption {
 
     @Id
@@ -14,24 +13,9 @@ public class KeyExemption {
     @ManyToOne
     private ApiKey apiKey;
 
-    private String notes;
+    private int temporaryExtensionLimit;
 
-    private Boolean unlimitedAccess = false;
-
-    private Integer temporaryExtensionLimit;
-
-    private LocalDateTime validUntil;
-
-    public KeyExemption() {}
-
-    public KeyExemption(ApiKey apiKey, String notes, Boolean unlimitedAccess,
-                        Integer temporaryExtensionLimit, LocalDateTime validUntil) {
-        this.apiKey = apiKey;
-        this.notes = notes;
-        this.unlimitedAccess = unlimitedAccess;
-        this.temporaryExtensionLimit = temporaryExtensionLimit;
-        this.validUntil = validUntil;
-    }
+    private Instant validUntil;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -39,15 +23,11 @@ public class KeyExemption {
     public ApiKey getApiKey() { return apiKey; }
     public void setApiKey(ApiKey apiKey) { this.apiKey = apiKey; }
 
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
+    public int getTemporaryExtensionLimit() { return temporaryExtensionLimit; }
+    public void setTemporaryExtensionLimit(int temporaryExtensionLimit) {
+        this.temporaryExtensionLimit = temporaryExtensionLimit;
+    }
 
-    public Boolean getUnlimitedAccess() { return unlimitedAccess; }
-    public void setUnlimitedAccess(Boolean unlimitedAccess) { this.unlimitedAccess = unlimitedAccess; }
-
-    public Integer getTemporaryExtensionLimit() { return temporaryExtensionLimit; }
-    public void setTemporaryExtensionLimit(Integer temporaryExtensionLimit) { this.temporaryExtensionLimit = temporaryExtensionLimit; }
-
-    public LocalDateTime getValidUntil() { return validUntil; }
-    public void setValidUntil(LocalDateTime validUntil) { this.validUntil = validUntil; }
+    public Instant getValidUntil() { return validUntil; }
+    public void setValidUntil(Instant validUntil) { this.validUntil = validUntil; }
 }
