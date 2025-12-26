@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.entity.RateLimitEnforcement;
-import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
 import org.springframework.stereotype.Service;
@@ -9,28 +9,28 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
+public class RateLimitEnforcementServiceImpl
+        implements RateLimitEnforcementService {
 
-    private final RateLimitEnforcementRepository repository;
+    private final RateLimitEnforcementRepository repo;
+    private final ApiKeyRepository keyRepo;
 
-    public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repository) {
-        this.repository = repository;
+    public RateLimitEnforcementServiceImpl(
+            RateLimitEnforcementRepository repo,
+            ApiKeyRepository keyRepo) {
+        this.repo = repo;
+        this.keyRepo = keyRepo;
     }
 
-    public RateLimitEnforcement create(RateLimitEnforcement enforcement) {
-        return repository.save(enforcement);
+    public RateLimitEnforcement createEnforcement(RateLimitEnforcement e) {
+        return repo.save(e);
     }
 
-    public RateLimitEnforcement getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("RateLimitEnforcement not found"));
+    public RateLimitEnforcement getEnforcementById(long id) {
+        return repo.findById(id).orElse(null);
     }
 
-    public List<RateLimitEnforcement> getAll() {
-        return repository.findAll();
-    }
-
-    public void delete(Long id) {
-        repository.deleteById(id);
+    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
+        return repo.findByApiKey_Id(apiKeyId);
     }
 }

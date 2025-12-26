@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.entity.ApiUsageLog;
-import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.ApiUsageLogRepository;
 import com.example.demo.service.ApiUsageLogService;
 import org.springframework.stereotype.Service;
@@ -11,26 +11,28 @@ import java.util.List;
 @Service
 public class ApiUsageLogServiceImpl implements ApiUsageLogService {
 
-    private final ApiUsageLogRepository repository;
+    private final ApiUsageLogRepository repo;
+    private final ApiKeyRepository keyRepo;
 
-    public ApiUsageLogServiceImpl(ApiUsageLogRepository repository) {
-        this.repository = repository;
+    public ApiUsageLogServiceImpl(ApiUsageLogRepository repo,
+                                  ApiKeyRepository keyRepo) {
+        this.repo = repo;
+        this.keyRepo = keyRepo;
     }
 
-    public ApiUsageLog create(ApiUsageLog log) {
-        return repository.save(log);
+    public ApiUsageLog logUsage(ApiUsageLog log) {
+        return repo.save(log);
     }
 
-    public ApiUsageLog getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ApiUsageLog not found"));
+    public List<ApiUsageLog> getUsageForApiKey(long apiKeyId) {
+        return repo.findByApiKey_Id(apiKeyId);
     }
 
-    public List<ApiUsageLog> getAll() {
-        return repository.findAll();
+    public long getUsageForToday(long apiKeyId) {
+        return repo.countByApiKey_Id(apiKeyId);
     }
 
-    public void delete(Long id) {
-        repository.deleteById(id);
+    public long countRequestsToday(long apiKeyId) {
+        return repo.countByApiKey_Id(apiKeyId);
     }
 }
