@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/enforcements")
+@RequestMapping("/enforcements")
 public class RateLimitEnforcementController {
 
     private final RateLimitEnforcementService service;
@@ -17,22 +17,17 @@ public class RateLimitEnforcementController {
     }
 
     @PostMapping
-    public RateLimitEnforcement create(@RequestBody RateLimitEnforcement enforcement) {
-        return service.create(enforcement);
+    public RateLimitEnforcement create(@RequestBody RateLimitEnforcement e) {
+        return service.createEnforcement(e);
     }
 
     @GetMapping("/{id}")
-    public RateLimitEnforcement getById(@PathVariable Long id) {
-        return service.getById(id);
+    public RateLimitEnforcement getById(@PathVariable long id) {
+        return service.getEnforcementById(id);
     }
 
-    @GetMapping
-    public List<RateLimitEnforcement> getAll() {
-        return service.getAll();
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    @GetMapping("/key/{apiKeyId}")
+    public List<RateLimitEnforcement> getByKey(@PathVariable long apiKeyId) {
+        return service.getEnforcementsForKey(apiKeyId);
     }
 }

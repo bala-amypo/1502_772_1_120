@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/usage-logs")
+@RequestMapping("/usage")
 public class ApiUsageLogController {
 
     private final ApiUsageLogService service;
@@ -18,21 +18,16 @@ public class ApiUsageLogController {
 
     @PostMapping
     public ApiUsageLog create(@RequestBody ApiUsageLog log) {
-        return service.create(log);
+        return service.logUsage(log);
     }
 
-    @GetMapping("/{id}")
-    public ApiUsageLog getById(@PathVariable Long id) {
-        return service.getById(id);
+    @GetMapping("/key/{apiKeyId}")
+    public List<ApiUsageLog> getByKey(@PathVariable long apiKeyId) {
+        return service.getUsageForApiKey(apiKeyId);
     }
 
-    @GetMapping
-    public List<ApiUsageLog> getAll() {
-        return service.getAll();
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    @GetMapping("/count/{apiKeyId}")
+    public long countToday(@PathVariable long apiKeyId) {
+        return service.countRequestsToday(apiKeyId);
     }
 }
