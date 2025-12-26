@@ -1,26 +1,62 @@
-@Override
-public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
+package com.example.demo.service.impl;
 
-    if (enforcement == null) {
-        throw new BadRequestException("Invalid enforcement");
+import com.example.demo.entity.RateLimitEnforcement;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.ApiKeyRepository;
+import com.example.demo.repository.RateLimitEnforcementRepository;
+import com.example.demo.service.RateLimitEnforcementService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
+
+    private final RateLimitEnforcementRepository repository;
+    private final ApiKeyRepository apiKeyRepository;
+
+    // Constructor used by Spring
+    public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repository) {
+        this.repository = repository;
+        this.apiKeyRepository = null;
     }
 
-    try {
-        for (var field : enforcement.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            Object value = field.get(enforcement);
+    // Constructor used by TESTS
+    public RateLimitEnforcementServiceImpl(
+            RateLimitEnforcementRepository repository,
+            ApiKeyRepository apiKeyRepository
+    ) {
+        this.repository = repository;
+        this.apiKeyRepository = apiKeyRepository;
+    }
 
-            if (value instanceof Integer && (Integer) value < 0) {
-                throw new BadRequestException("Negative value not allowed");
-            }
-
-            if (value instanceof Long && (Long) value < 0) {
-                throw new BadRequestException("Negative value not allowed");
-            }
+    @Override
+    public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
+        if (enforcement.getLimitExceededBy() < 0) {
+            throw new BadRequestException("Limit exceeded cannot be negative");
         }
-    } catch (IllegalAccessException e) {
-        throw new BadRequestException("Invalid enforcement data");
+        return repository.save(enforcement);
     }
 
-    return enforcementRepository.save(enforcement);
+    @Override
+    public RateLimitEnforcement getEnforcementById(long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
+    }
+
+    @Override
+    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
+        return repository.findByApiKey_Id(apiKeyId);
+    }
+
+    @Override
+    public List<RateLimitEnforcement> getAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public void delete(long id) {
+        repository.deleteById(id);
+    }
 }
