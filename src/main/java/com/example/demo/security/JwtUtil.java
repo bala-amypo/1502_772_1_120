@@ -1,28 +1,42 @@
 package com.example.demo.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Map;
 
+@Component
 public class JwtUtil {
 
-    private static final String SECRET = "secret-key";
+    private final String SECRET = "secretkey123";
+    private final long EXPIRATION = 1000 * 60 * 60;
 
-    public String generateToken(String email) {
+    public String generateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .setSubject(email)
+                .setClaims(claims)
+                .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(SignatureAlgorithm.HS256, SECRET)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public Claims getClaims(String token) {
+        return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
+    }
+
+    public String getUsername(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public boolean isTokenValid(String token, String username) {
+        return getUsername(token).equals(username);
+    }
+
+    public long getExpirationMillis() {
+        return EXPIRATION;
     }
 }
