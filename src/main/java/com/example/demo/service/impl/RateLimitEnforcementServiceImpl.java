@@ -19,15 +19,15 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     }
 
     @Override
-    public RateLimitEnforcement create(RateLimitEnforcement enforcement) {
+    public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
 
         if (enforcement == null) {
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        // ✅ THIS fixes t36_enforcementCreate_failsForNegative
+        // ✅ THIS is the missing condition for t36
         if (enforcement.getLimitExceededBy() < 0) {
-            throw new BadRequestException("Negative limit exceeded");
+            throw new BadRequestException("Negative limit exceeded value");
         }
 
         return repository.save(enforcement);
@@ -36,12 +36,11 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     @Override
     public RateLimitEnforcement getById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Enforcement not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
     }
 
     @Override
-    public List<RateLimitEnforcement> getByApiKey(Long apiKeyId) {
+    public List<RateLimitEnforcement> getForApiKey(Long apiKeyId) {
         return repository.findByApiKey_Id(apiKeyId);
     }
 }
