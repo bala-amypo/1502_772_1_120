@@ -1,10 +1,10 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.UserAccount;
+import com.example.demo.dto.AuthRequestDto;
+import com.example.demo.dto.AuthResponseDto;
+import com.example.demo.dto.RegisterRequestDto;
 import com.example.demo.service.AuthService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,13 +16,13 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping
-    public UserAccount create(@RequestBody UserAccount user) {
-        return authService.create(user);
+    @PostMapping("/register")
+    public void register(@RequestBody RegisterRequestDto dto) {
+        authService.register(dto);
     }
 
-    @GetMapping
-    public List<UserAccount> getAll() {
-        return authService.getAll();
+    @PostMapping("/login")
+    public AuthResponseDto login(@RequestBody AuthRequestDto dto) {
+        return authService.login(dto);
     }
 }

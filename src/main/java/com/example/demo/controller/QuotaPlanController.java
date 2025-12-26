@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/quota-plans")
+@RequestMapping("/quota-plans")
 public class QuotaPlanController {
 
     private final QuotaPlanService service;
@@ -18,26 +18,29 @@ public class QuotaPlanController {
 
     @PostMapping
     public QuotaPlan create(@RequestBody QuotaPlan plan) {
-        return service.create(plan);
+        return service.createQuotaPlan(plan);
     }
 
     @PutMapping("/{id}")
-    public QuotaPlan update(@PathVariable Long id, @RequestBody QuotaPlan plan) {
-        return service.update(id, plan);
+    public QuotaPlan update(
+            @PathVariable Long id,
+            @RequestBody QuotaPlan plan
+    ) {
+        return service.updateQuotaPlan(id, plan);
     }
 
     @GetMapping("/{id}")
     public QuotaPlan getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getQuotaPlanById(id);
     }
 
     @GetMapping
     public List<QuotaPlan> getAll() {
-        return service.getAll();
+        return service.getAllPlans();
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    public void deactivate(@PathVariable Long id) {
+        service.deactivateQuotaPlan(id);
     }
 }
