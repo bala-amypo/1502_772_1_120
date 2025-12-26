@@ -5,8 +5,8 @@ import java.util.List;
 
 public interface ApiUsageLogService {
 
-    ApiUsageLog create(ApiUsageLog log);
-    ApiUsageLog getById(Long id);
-    List<ApiUsageLog> getAll();
-    void delete(Long id);
+    ApiUsageLog logUsage(ApiUsageLog log);
+    List<ApiUsageLog> getUsageForApiKey(long apiKeyId);
+    long getUsageForToday(long apiKeyId);
+    long countRequestsToday(long apiKeyId);
 }

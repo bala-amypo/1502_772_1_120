@@ -1,16 +1,26 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 public class RateLimitEnforcement {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
-    private LocalDateTime blockedAt;
-    private Integer limitExceededBy;
+    @ManyToOne
+    private ApiKey apiKey;
+
+    private int limitExceededBy;
     private String message;
+
+    public void setApiKey(ApiKey apiKey) { this.apiKey = apiKey; }
+    public ApiKey getApiKey() { return apiKey; }
+
+    public void setLimitExceededBy(int v) { this.limitExceededBy = v; }
+    public int getLimitExceededBy() { return limitExceededBy; }
+
+    public void setMessage(String m) { this.message = m; }
+    public String getMessage() { return message; }
 }
