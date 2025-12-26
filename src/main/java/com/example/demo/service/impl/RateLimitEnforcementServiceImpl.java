@@ -1,62 +1,26 @@
-package com.example.demo.service.impl;
+@Override
+public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
 
-import com.example.demo.entity.RateLimitEnforcement;
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.ApiKeyRepository;
-import com.example.demo.repository.RateLimitEnforcementRepository;
-import com.example.demo.service.RateLimitEnforcementService;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-@Service
-public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
-
-    private final RateLimitEnforcementRepository enforcementRepository;
-    private final ApiKeyRepository apiKeyRepository;
-
-    // ✅ THIS constructor is REQUIRED by tests
-    public RateLimitEnforcementServiceImpl(
-            RateLimitEnforcementRepository enforcementRepository,
-            ApiKeyRepository apiKeyRepository
-    ) {
-        this.enforcementRepository = enforcementRepository;
-        this.apiKeyRepository = apiKeyRepository;
+    if (enforcement == null) {
+        throw new BadRequestException("Invalid enforcement");
     }
 
-    @Override
-    public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
+    try {
+        for (var field : enforcement.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            Object value = field.get(enforcement);
 
-        // ✅ t36_enforcementCreate_failsForNegative
-        if (enforcement == null || enforcement.getLimitExceededBy() < 0) {
-            throw new BadRequestException("Invalid limit exceeded value");
+            if (value instanceof Integer && (Integer) value < 0) {
+                throw new BadRequestException("Negative value not allowed");
+            }
+
+            if (value instanceof Long && (Long) value < 0) {
+                throw new BadRequestException("Negative value not allowed");
+            }
         }
-
-        return enforcementRepository.save(enforcement);
+    } catch (IllegalAccessException e) {
+        throw new BadRequestException("Invalid enforcement data");
     }
 
-    @Override
-    public RateLimitEnforcement getEnforcementById(long id) {
-
-        // ✅ t68_enforcement_getById_notFound
-        return enforcementRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Enforcement not found"));
-    }
-
-    @Override
-    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
-        return enforcementRepository.findByApiKey_Id(apiKeyId);
-    }
-
-    @Override
-    public List<RateLimitEnforcement> getAll() {
-        return enforcementRepository.findAll();
-    }
-
-    @Override
-    public void delete(long id) {
-        enforcementRepository.deleteById(id);
-    }
+    return enforcementRepository.save(enforcement);
 }
