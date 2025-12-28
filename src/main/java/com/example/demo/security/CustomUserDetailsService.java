@@ -1,7 +1,7 @@
 package com.example.demo.security;
 
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.UserAccount;
+import com.example.demo.repository.UserAccountRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository repo;
+    private final UserAccountRepository repo;
 
-    public CustomUserDetailsService(UserRepository repo) {
+    public CustomUserDetailsService(UserAccountRepository repo) {
         this.repo = repo;
     }
 
@@ -20,13 +20,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        User user = repo.findByEmail(email)
+        UserAccount user = repo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .roles("USER")
+                .roles(user.getRole())
                 .build();
     }
 }

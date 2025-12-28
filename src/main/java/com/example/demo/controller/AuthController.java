@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.UserAccount;
+import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,24 +16,24 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepo;
+    private final UserAccountRepository repo;
     private final PasswordEncoder encoder;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtUtil jwtUtil,
-                          UserRepository userRepo,
+                          UserAccountRepository repo,
                           PasswordEncoder encoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.userRepo = userRepo;
+        this.repo = repo;
         this.encoder = encoder;
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
+    public String register(@RequestBody UserAccount user) {
         user.setPassword(encoder.encode(user.getPassword()));
-        userRepo.save(user);
-        return "Registered";
+        repo.save(user);
+        return "User registered";
     }
 
     @PostMapping("/login")
@@ -45,10 +45,13 @@ public class AuthController {
                         req.get("password"))
         );
 
-        String token = jwtUtil.generateToken(
-                new org.springframework.security.core.userdetails.User(
-                        req.get("email"), "", java.util.List.of())
+        var userDetails = new org.springframework.security.core.userdetails.User(
+                req.get("email"),
+                "",
+                java.util.List.of()
         );
+
+        String token = jwtUtil.generateToken(userDetails);
 
         return Map.of("token", token);
     }
