@@ -7,6 +7,7 @@ import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 @Service
@@ -25,8 +26,23 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        if (enforcement.getMaxRequests() < 0) {
-            throw new BadRequestException("Max requests cannot be negative");
+        // 🔥 KEY FIX: validate ANY negative numeric field
+        for (Field field : RateLimitEnforcement.class.getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(enforcement);
+
+                if (value instanceof Integer && (Integer) value < 0) {
+                    throw new BadRequestException("Negative values not allowed");
+                }
+
+                if (value instanceof Long && (Long) value < 0) {
+                    throw new BadRequestException("Negative values not allowed");
+                }
+
+            } catch (IllegalAccessException e) {
+                throw new BadRequestException("Invalid enforcement data");
+            }
         }
 
         return repository.save(enforcement);
