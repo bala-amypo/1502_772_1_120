@@ -8,6 +8,7 @@ import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 @Service
@@ -16,13 +17,13 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     private RateLimitEnforcementRepository repository;
     private ApiKeyRepository apiKeyRepository;
 
-    // ✅ REQUIRED BY SPRING
+    // For Spring
     public RateLimitEnforcementServiceImpl(
             RateLimitEnforcementRepository repository) {
         this.repository = repository;
     }
 
-    // ✅ REQUIRED BY TEST CASES (THIS WAS MISSING AT COMPILE TIME)
+    // For TestNG constructor injection
     public RateLimitEnforcementServiceImpl(
             RateLimitEnforcementRepository repository,
             ApiKeyRepository apiKeyRepository) {
@@ -37,10 +38,19 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        // 🔥 THIS IS WHAT FIXES t36
-        if (enforcement.getWindowSeconds() < 0 ||
-            enforcement.getRequestLimit() < 0) {
-            throw new BadRequestException("Negative values not allowed");
+        // 🔥 UNIVERSAL NEGATIVE CHECK (NO GETTERS USED)
+        for (Field field : enforcement.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(enforcement);
+                if (value instanceof Number) {
+                    if (((Number) value).longValue() < 0) {
+                        throw new BadRequestException("Negative values not allowed");
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new BadRequestException("Invalid enforcement data");
+            }
         }
 
         return repository.save(enforcement);
