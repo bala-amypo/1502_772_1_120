@@ -12,10 +12,10 @@ import java.util.List;
 @Service
 public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
 
-    private final RateLimitEnforcementRepository repo;
+    private final RateLimitEnforcementRepository repository;
 
-    public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repo) {
-        this.repo = repo;
+    public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repository) {
+        this.repository = repository;
     }
 
     @Override
@@ -25,33 +25,33 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        if (enforcement.getLimit() < 0) {
-            throw new BadRequestException("Limit cannot be negative");
+        if (enforcement.getMaxRequests() < 0) {
+            throw new BadRequestException("Max requests cannot be negative");
         }
 
-        return repo.save(enforcement);
+        return repository.save(enforcement);
     }
 
     @Override
-    public RateLimitEnforcement getById(Long id) {
-        return repo.findById(id)
+    public RateLimitEnforcement getById(long id) {
+        return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
     }
 
     @Override
     public List<RateLimitEnforcement> getAll() {
-        return repo.findAll();
+        return repository.findAll();
     }
 
     @Override
-    public void delete(Long id) {
-        RateLimitEnforcement enforcement = repo.findById(id)
+    public void delete(long id) {
+        RateLimitEnforcement enforcement = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
-        repo.delete(enforcement);
+        repository.delete(enforcement);
     }
 
     @Override
-    public List<RateLimitEnforcement> getByApiKeyId(Long apiKeyId) {
-        return repo.findByApiKey_Id(apiKeyId);
+    public List<RateLimitEnforcement> getByApiKeyId(long apiKeyId) {
+        return repository.findByApiKey_Id(apiKeyId);
     }
 }
