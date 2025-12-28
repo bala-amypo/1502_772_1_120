@@ -3,7 +3,6 @@ package com.example.demo.service.impl;
 import com.example.demo.entity.RateLimitEnforcement;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
 import org.springframework.stereotype.Service;
@@ -13,50 +12,46 @@ import java.util.List;
 @Service
 public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementService {
 
-    private final RateLimitEnforcementRepository enforcementRepository;
-    private final ApiKeyRepository apiKeyRepository;
+    private final RateLimitEnforcementRepository repo;
 
-    // ✅ THIS constructor is REQUIRED by tests
-    public RateLimitEnforcementServiceImpl(
-            RateLimitEnforcementRepository enforcementRepository,
-            ApiKeyRepository apiKeyRepository
-    ) {
-        this.enforcementRepository = enforcementRepository;
-        this.apiKeyRepository = apiKeyRepository;
+    public RateLimitEnforcementServiceImpl(RateLimitEnforcementRepository repo) {
+        this.repo = repo;
     }
 
     @Override
-    public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
+    public RateLimitEnforcement create(RateLimitEnforcement enforcement) {
 
-        // ✅ t36_enforcementCreate_failsForNegative
-        if (enforcement == null || enforcement.getLimitExceededBy() < 0) {
-            throw new BadRequestException("Invalid limit exceeded value");
+        if (enforcement == null) {
+            throw new BadRequestException("Enforcement cannot be null");
         }
 
-        return enforcementRepository.save(enforcement);
+        if (enforcement.getLimit() < 0) {
+            throw new BadRequestException("Limit cannot be negative");
+        }
+
+        return repo.save(enforcement);
     }
 
     @Override
-    public RateLimitEnforcement getEnforcementById(long id) {
-
-        // ✅ t68_enforcement_getById_notFound
-        return enforcementRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Enforcement not found"));
-    }
-
-    @Override
-    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
-        return enforcementRepository.findByApiKey_Id(apiKeyId);
+    public RateLimitEnforcement getById(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
     }
 
     @Override
     public List<RateLimitEnforcement> getAll() {
-        return enforcementRepository.findAll();
+        return repo.findAll();
     }
 
     @Override
-    public void delete(long id) {
-        enforcementRepository.deleteById(id);
+    public void delete(Long id) {
+        RateLimitEnforcement enforcement = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
+        repo.delete(enforcement);
+    }
+
+    @Override
+    public List<RateLimitEnforcement> getByApiKeyId(Long apiKeyId) {
+        return repo.findByApiKey_Id(apiKeyId);
     }
 }
