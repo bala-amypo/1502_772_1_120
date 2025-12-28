@@ -19,14 +19,14 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     }
 
     @Override
-    public RateLimitEnforcement create(RateLimitEnforcement enforcement) {
+    public RateLimitEnforcement createEnforcement(RateLimitEnforcement enforcement) {
 
         if (enforcement == null) {
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        if (enforcement.getLimit() < 0) {
-            throw new BadRequestException("Limit cannot be negative");
+        if (enforcement.getMaxRequests() < 0) {
+            throw new BadRequestException("Max requests cannot be negative");
         }
 
         return repository.save(enforcement);
