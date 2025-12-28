@@ -6,6 +6,7 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.RateLimitEnforcementRepository;
 import com.example.demo.service.RateLimitEnforcementService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -17,13 +18,14 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     private RateLimitEnforcementRepository repository;
     private ApiKeyRepository apiKeyRepository;
 
-    // For Spring
+    // ✅ THIS IS THE CONSTRUCTOR SPRING WILL USE
+    @Autowired
     public RateLimitEnforcementServiceImpl(
             RateLimitEnforcementRepository repository) {
         this.repository = repository;
     }
 
-    // For TestNG constructor injection
+    // ✅ THIS IS FOR TESTNG (DO NOT REMOVE)
     public RateLimitEnforcementServiceImpl(
             RateLimitEnforcementRepository repository,
             ApiKeyRepository apiKeyRepository) {
@@ -38,7 +40,7 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        // 🔥 UNIVERSAL NEGATIVE CHECK (NO GETTERS USED)
+        // 🔥 UNIVERSAL NEGATIVE CHECK (NO GETTERS)
         for (Field field : enforcement.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             try {
