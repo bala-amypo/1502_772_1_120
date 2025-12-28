@@ -25,15 +25,15 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
             throw new BadRequestException("Enforcement cannot be null");
         }
 
-        if (enforcement.getMaxRequests() < 0) {
-            throw new BadRequestException("Max requests cannot be negative");
+        if (enforcement.getLimit() < 0) {
+            throw new BadRequestException("Limit cannot be negative");
         }
 
         return repository.save(enforcement);
     }
 
     @Override
-    public RateLimitEnforcement getById(long id) {
+    public RateLimitEnforcement getEnforcementById(long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enforcement not found"));
     }
@@ -51,7 +51,7 @@ public class RateLimitEnforcementServiceImpl implements RateLimitEnforcementServ
     }
 
     @Override
-    public List<RateLimitEnforcement> getByApiKeyId(long apiKeyId) {
+    public List<RateLimitEnforcement> getEnforcementsForKey(long apiKeyId) {
         return repository.findByApiKey_Id(apiKeyId);
     }
 }
