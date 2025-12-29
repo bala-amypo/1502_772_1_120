@@ -4,13 +4,16 @@ import com.example.demo.dto.AuthRequestDto;
 import com.example.demo.dto.AuthResponseDto;
 import com.example.demo.dto.RegisterRequestDto;
 import com.example.demo.entity.UserAccount;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.service.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -35,6 +38,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserAccount register(RegisterRequestDto dto) {
 
+        if (userRepo.existsByEmail(dto.getEmail())) {
+            throw new BadRequestException("Email already exists");
+        }
+
         UserAccount user = new UserAccount();
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -46,18 +53,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto login(AuthRequestDto dto) {
 
-        // 🔥 THIS LINE FIXES t24_userLogin_invalidUser
         UserAccount user = userRepo.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        dto.getEmail(),
-                        dto.getPassword()
-                )
-        );
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole());
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(claims, user.getEmail());
 
         AuthResponseDto response = new AuthResponseDto();
         response.setEmail(user.getEmail());
