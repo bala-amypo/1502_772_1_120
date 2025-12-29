@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.AuthRequestDto;
+import com.example.demo.dto.AuthResponseDto;
 import com.example.demo.dto.RegisterRequestDto;
 import com.example.demo.entity.UserAccount;
 import com.example.demo.exception.BadRequestException;
@@ -13,8 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -24,7 +23,6 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authManager;
     private final JwtUtil jwtUtil;
 
-    // 🔥 REQUIRED BY TEST
     public AuthServiceImpl(UserAccountRepository userRepo,
                            PasswordEncoder encoder,
                            AuthenticationManager authManager,
@@ -36,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(RegisterRequestDto dto) {
+    public UserAccount register(RegisterRequestDto dto) {
         if (userRepo.existsByEmail(dto.getEmail())) {
             throw new BadRequestException("Email already exists");
         }
@@ -46,11 +44,12 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(encoder.encode(dto.getPassword()));
         user.setRoles(Collections.singleton(dto.getRole()));
 
-        userRepo.save(user);
+        return userRepo.save(user);
     }
 
     @Override
-    public String login(AuthRequestDto dto) {
+    public AuthResponseDto login(AuthRequestDto dto) {
+
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         dto.getEmail(),
@@ -58,7 +57,11 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        Map<String, Object> claims = new HashMap<>();
-        return jwtUtil.generateToken(claims, dto.getEmail());
+        String token = jwtUtil.generateToken(
+                Collections.emptyMap(),
+                dto.getEmail()
+        );
+
+        return new AuthResponseDto(token);
     }
 }
