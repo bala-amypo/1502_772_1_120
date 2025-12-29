@@ -4,13 +4,19 @@ import com.example.demo.entity.ApiUsageLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ApiUsageLogRepository extends JpaRepository<ApiUsageLog, Long> {
 
-    List<ApiUsageLog> findByApiKeyId(long apiKeyId);
+    List<ApiUsageLog> findByApiKey_Id(long apiKeyId);
 
-    long countByApiKeyIdAndDate(long apiKeyId, LocalDate date);
+    List<ApiUsageLog> findForKeyBetween(long apiKeyId,
+                                       LocalDateTime start,
+                                       LocalDateTime end);
+
+    long countForKeyBetween(long apiKeyId,
+                            LocalDateTime start,
+                            LocalDateTime end);
 }
