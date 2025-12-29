@@ -2,16 +2,15 @@ package com.example.demo.repository;
 
 import com.example.demo.entity.ApiUsageLog;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
+
+@Repository
 public interface ApiUsageLogRepository extends JpaRepository<ApiUsageLog, Long> {
 
-    @Query("""
-        SELECT COUNT(u)
-        FROM ApiUsageLog u
-        WHERE u.apiKey.id = :apiKeyId
-        AND DATE(u.timestamp) = CURRENT_DATE
-    """)
-    long countToday(@Param("apiKeyId") long apiKeyId);
+    List<ApiUsageLog> findByApiKeyId(long apiKeyId);
+
+    long countByApiKeyIdAndDate(long apiKeyId, LocalDate date);
 }
