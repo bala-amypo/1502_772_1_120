@@ -25,8 +25,14 @@ public class JwtUtil {
                 .compact();
     }
 
+    // ✅ used by TESTS
     public String getUsername(String token) {
         return getClaims(token).getSubject();
+    }
+
+    // ✅ used by FILTER (alias)
+    public String extractUsername(String token) {
+        return getUsername(token);
     }
 
     public Claims getClaims(String token) {
@@ -43,7 +49,7 @@ public class JwtUtil {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = getUsername(token);
-        return username.equals(userDetails.getUsername()) &&
-                !getClaims(token).getExpiration().before(new Date());
+        return username.equals(userDetails.getUsername())
+                && !getClaims(token).getExpiration().before(new Date());
     }
 }
