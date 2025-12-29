@@ -1,40 +1,47 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.UserAccount;
-import com.example.demo.repository.UserAccountRepository;
+import com.example.demo.dto.AuthRequestDto;
+import com.example.demo.dto.AuthResponseDto;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.service.AuthService;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserAccountRepository repo;
+    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public AuthServiceImpl(UserAccountRepository repo, JwtUtil jwtUtil) {
-        this.repo = repo;
+    public AuthServiceImpl(AuthenticationManager authenticationManager,
+                           JwtUtil jwtUtil) {
+        this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public Map<String, String> login(String email, String password) {
+    public AuthResponseDto login(AuthRequestDto request) {
 
-        UserAccount user = repo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        Authentication authentication;
 
-        User userDetails = new User(
-                user.getEmail(),
-                user.getPassword(),
-                List.of()
-        );
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid credentials");
+        }
 
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(userDetails);
 
-        return Map.of("token", token);
+        return new AuthResponseDto(token);
     }
 }
