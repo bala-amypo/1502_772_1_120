@@ -64,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto register(RegisterRequestDto request) {
 
-        if (userAccountRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userAccountRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("User already exists");
         }
 
