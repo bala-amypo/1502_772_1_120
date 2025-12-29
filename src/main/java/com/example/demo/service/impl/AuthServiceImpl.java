@@ -23,12 +23,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto login(AuthRequestDto request) {
 
-        if (request == null ||
-            request.getEmail() == null ||
-            request.getPassword() == null) {
-            throw new RuntimeException("Invalid login request");
-        }
-
         UserAccount user = userAccountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
@@ -38,4 +32,5 @@ public class AuthServiceImpl implements AuthService {
 
         return new AuthResponseDto("LOGIN_SUCCESS", user.getRole());
     }
+
 }
