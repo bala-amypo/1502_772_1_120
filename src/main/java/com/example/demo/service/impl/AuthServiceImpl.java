@@ -2,8 +2,8 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.AuthRequestDto;
 import com.example.demo.dto.AuthResponseDto;
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.UserAccount;
+import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
+    private final UserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserRepository userRepository,
+    public AuthServiceImpl(UserAccountRepository userAccountRepository,
                            PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+        this.userAccountRepository = userAccountRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -26,16 +26,16 @@ public class AuthServiceImpl implements AuthService {
         if (request == null ||
             request.getEmail() == null ||
             request.getPassword() == null) {
-            throw new RuntimeException("Invalid request");
+            throw new RuntimeException("Invalid login request");
         }
 
-        User user = userRepository.findByEmail(request.getEmail())
+        UserAccount user = userAccountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        return new AuthResponseDto("LOGIN_SUCCESS");
+        return new AuthResponseDto("LOGIN_SUCCESS", user.getRole());
     }
 }

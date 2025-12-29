@@ -13,6 +13,14 @@ public class UserAccount {
     private String password;
     private String role;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
     }
