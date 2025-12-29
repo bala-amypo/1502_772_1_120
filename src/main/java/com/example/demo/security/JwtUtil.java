@@ -14,34 +14,23 @@ import java.util.Map;
 public class JwtUtil {
 
     private final String SECRET_KEY = "secret123";
-    private final long EXPIRATION_MILLIS = 1000 * 60 * 60; // 1 hour
+    private final long EXPIRATION_MILLIS = 1000 * 60 * 60;
 
     // =====================================================
-    // REQUIRED BY SPRING SECURITY
+    // TOKEN GENERATION
     // =====================================================
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
+        return createToken(new HashMap<>(), userDetails.getUsername());
     }
 
-    // =====================================================
-    // REQUIRED BY TESTS (username only)
-    // =====================================================
     public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(new HashMap<>(), username);
     }
 
-    // =====================================================
-    // 🔥 REQUIRED BY TESTS (claims + username)
-    // =====================================================
     public String generateToken(Map<String, Object> claims, String username) {
         return createToken(claims, username);
     }
 
-    // =====================================================
-    // INTERNAL TOKEN CREATOR
-    // =====================================================
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -53,7 +42,7 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // CLAIM HELPERS (TESTS REQUIRE THESE)
+    // CLAIM HELPERS (REQUIRED BY TESTS)
     // =====================================================
     public Claims getClaims(String token) {
         return Jwts.parser()
@@ -75,10 +64,16 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // VALIDATION
+    // TOKEN VALIDATION (🔥 BOTH OVERLOADS REQUIRED)
     // =====================================================
     public boolean isTokenValid(String token, UserDetails userDetails) {
         return getUsername(token).equals(userDetails.getUsername())
+                && !isTokenExpired(token);
+    }
+
+    // 🔥 REQUIRED BY TESTS
+    public boolean isTokenValid(String token, String username) {
+        return getUsername(token).equals(username)
                 && !isTokenExpired(token);
     }
 
