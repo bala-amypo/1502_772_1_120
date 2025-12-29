@@ -54,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
+        claims.put("role", user.getRole());
 
         String token = jwtUtil.generateToken(claims, user.getEmail());
 
@@ -70,11 +71,13 @@ public class AuthServiceImpl implements AuthService {
         UserAccount user = new UserAccount();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole());
 
         userAccountRepository.save(user);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
+        claims.put("role", user.getRole());
 
         String token = jwtUtil.generateToken(claims, user.getEmail());
 
