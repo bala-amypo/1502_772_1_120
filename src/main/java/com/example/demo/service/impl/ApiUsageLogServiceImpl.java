@@ -1,7 +1,10 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.entity.ApiKey;
 import com.example.demo.entity.ApiUsageLog;
 import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.ApiKeyRepository;
 import com.example.demo.repository.ApiUsageLogRepository;
 import com.example.demo.service.ApiUsageLogService;
 import org.springframework.stereotype.Service;
@@ -14,44 +17,55 @@ import java.util.List;
 @Service
 public class ApiUsageLogServiceImpl implements ApiUsageLogService {
 
-    private final ApiUsageLogRepository repo;
+    private final ApiUsageLogRepository usageRepo;
+    private final ApiKeyRepository apiKeyRepo;
 
-    public ApiUsageLogServiceImpl(ApiUsageLogRepository repo) {
-        this.repo = repo;
+    public ApiUsageLogServiceImpl(ApiUsageLogRepository usageRepo,
+                                  ApiKeyRepository apiKeyRepo) {
+        this.usageRepo = usageRepo;
+        this.apiKeyRepo = apiKeyRepo;
     }
 
     @Override
     public ApiUsageLog logUsage(ApiUsageLog log) {
+
+        ApiKey key = apiKeyRepo.findById(log.getApiKey().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("API Key not found"));
+
         if (log.getTimestamp().isAfter(Instant.now())) {
             throw new BadRequestException("Future timestamp not allowed");
         }
-        return repo.save(log);
+
+        log.setApiKey(key);
+        return usageRepo.save(log);
     }
 
     @Override
-    public List<ApiUsageLog> getUsageForToday(Long apiKeyId) {
+    public List<ApiUsageLog> getUsageForToday(long apiKeyId) {
         Instant start = LocalDate.now()
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant();
 
-        Instant end = Instant.now();
+        Instant end = start.plusSeconds(86400);
 
-        return repo.findForKeyBetween(apiKeyId, start, end);
+        return usageRepo.findForKeyBetween(apiKeyId, start, end);
     }
 
     @Override
-    public List<ApiUsageLog> getUsageForApiKey(Long apiKeyId) {
-        return repo.findByApiKey_Id(apiKeyId);
-    }
-
-    @Override
-    public int countRequestsToday(Long apiKeyId) {
+    public int countRequestsToday(long apiKeyId) {
         Instant start = LocalDate.now()
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant();
 
-        Instant end = Instant.now();
+        Instant end = start.plusSeconds(86400);
 
-        return repo.countForKeyBetween(apiKeyId, start, end);
+        // 🔥 FIX: convert Long → int safely
+        Long count = usageRepo.countForKeyBetween(apiKeyId, start, end);
+        return count == null ? 0 : count.intValue();
+    }
+
+    @Override
+    public List<ApiUsageLog> getUsageForApiKey(long apiKeyId) {
+        return usageRepo.findByApiKey_Id(apiKeyId);
     }
 }
