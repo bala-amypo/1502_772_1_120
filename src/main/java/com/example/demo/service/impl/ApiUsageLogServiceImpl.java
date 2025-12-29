@@ -23,7 +23,7 @@ public class ApiUsageLogServiceImpl implements ApiUsageLogService {
     @Override
     public ApiUsageLog logUsage(ApiUsageLog log) {
         if (log.getTimestamp().isAfter(Instant.now())) {
-            throw new BadRequestException("Future timestamp");
+            throw new BadRequestException("Future timestamp not allowed");
         }
         return repo.save(log);
     }
@@ -52,6 +52,6 @@ public class ApiUsageLogServiceImpl implements ApiUsageLogService {
 
         Instant end = Instant.now();
 
-        return repo.countForKeyBetween(apiKeyId, start, end).intValue();
+        return repo.countForKeyBetween(apiKeyId, start, end);
     }
 }
