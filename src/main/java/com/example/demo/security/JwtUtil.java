@@ -17,7 +17,7 @@ public class JwtUtil {
     private final long EXPIRATION_MILLIS = 1000 * 60 * 60; // 1 hour
 
     // =====================================================
-    // CORE TOKEN GENERATION (UserDetails)
+    // REQUIRED BY SPRING SECURITY
     // =====================================================
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
@@ -25,7 +25,7 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // REQUIRED BY TESTS (String username)
+    // REQUIRED BY TESTS (username only)
     // =====================================================
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -33,7 +33,14 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // INTERNAL TOKEN CREATION
+    // 🔥 REQUIRED BY TESTS (claims + username)
+    // =====================================================
+    public String generateToken(Map<String, Object> claims, String username) {
+        return createToken(claims, username);
+    }
+
+    // =====================================================
+    // INTERNAL TOKEN CREATOR
     // =====================================================
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
@@ -46,7 +53,7 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // CLAIM EXTRACTION (TESTS REQUIRE THESE)
+    // CLAIM HELPERS (TESTS REQUIRE THESE)
     // =====================================================
     public Claims getClaims(String token) {
         return Jwts.parser()
@@ -59,7 +66,6 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
-    // alias used by filter/tests
     public String extractUsername(String token) {
         return getUsername(token);
     }
@@ -69,11 +75,11 @@ public class JwtUtil {
     }
 
     // =====================================================
-    // TOKEN VALIDATION
+    // VALIDATION
     // =====================================================
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = getUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return getUsername(token).equals(userDetails.getUsername())
+                && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
