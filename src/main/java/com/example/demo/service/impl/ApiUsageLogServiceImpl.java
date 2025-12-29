@@ -1,55 +1,72 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.ApiUsageLog;
+import com.example.demo.dto.*;
+import com.example.demo.entity.UserAccount;
 import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.ApiKeyRepository;
-import com.example.demo.repository.ApiUsageLogRepository;
-import com.example.demo.service.ApiUsageLogService;
+import com.example.demo.repository.UserAccountRepository;
+import com.example.demo.security.JwtUtil;
+import com.example.demo.service.AuthService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.Map;
 
 @Service
-public class ApiUsageLogServiceImpl implements ApiUsageLogService {
+public class AuthServiceImpl implements AuthService {
 
-    private final ApiUsageLogRepository repo;
-    private final ApiKeyRepository apiKeyRepo;
+    private final UserAccountRepository userRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    public ApiUsageLogServiceImpl(ApiUsageLogRepository repo, ApiKeyRepository apiKeyRepo) {
-        this.repo = repo;
-        this.apiKeyRepo = apiKeyRepo;
+    public AuthServiceImpl(
+            UserAccountRepository userRepo,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            JwtUtil jwtUtil
+    ) {
+        this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public ApiUsageLog logUsage(ApiUsageLog log) {
-        apiKeyRepo.findById(log.getApiKey().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+    public UserAccount register(RegisterRequestDto dto) {
+        if (userRepo.existsByEmail(dto.getEmail())) {
+            throw new BadRequestException("Email already exists");
+        }
 
-        if (log.getTimestamp().isAfter(Instant.now()))
-            throw new BadRequestException("Future timestamp");
+        UserAccount user = new UserAccount();
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(dto.getRole());
 
-        return repo.save(log);
+        return userRepo.save(user);
     }
 
     @Override
-    public List<ApiUsageLog> getUsageForApiKey(long apiKeyId) {
-        return repo.findByApiKey_Id(apiKeyId);
-    }
+    public AuthResponseDto login(AuthRequestDto dto) {
 
-    @Override
-    public List<ApiUsageLog> getUsageForToday(long apiKeyId) {
-        Instant start = Instant.now().truncatedTo(ChronoUnit.DAYS);
-        Instant end = start.plus(1, ChronoUnit.DAYS);
-        return repo.findForKeyBetween(apiKeyId, start, end);
-    }
+        UserAccount user = userRepo.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-    @Override
-    public int countRequestsToday(long apiKeyId) {
-        Instant start = Instant.now().truncatedTo(ChronoUnit.DAYS);
-        Instant end = start.plus(1, ChronoUnit.DAYS);
-        return repo.countForKeyBetween(apiKeyId, start, end);
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.getEmail(),
+                        dto.getPassword()
+                )
+        );
+
+        String token = jwtUtil.generateToken(
+                Map.of("role", user.getRole()),
+                user.getEmail()
+        );
+
+        AuthResponseDto response = new AuthResponseDto();
+        response.setToken(token);
+        return response;
     }
 }
