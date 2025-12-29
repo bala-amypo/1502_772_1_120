@@ -7,14 +7,21 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class JwtUtil {
 
-    private static final long EXPIRATION = 60 * 60 * 1000; // 1 hour
+    private static final long EXPIRATION = 60 * 60 * 1000;
     private static final Key KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
+    // 🔹 USED BY TESTS
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails.getUsername());
+    }
+
+    // 🔹 USED INTERNALLY
     public String generateToken(Map<String, Object> claims, String username) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -25,12 +32,11 @@ public class JwtUtil {
                 .compact();
     }
 
-    // ✅ used by TESTS
     public String getUsername(String token) {
         return getClaims(token).getSubject();
     }
 
-    // ✅ used by FILTER (alias)
+    // 🔹 FILTER SUPPORT
     public String extractUsername(String token) {
         return getUsername(token);
     }
@@ -48,8 +54,7 @@ public class JwtUtil {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = getUsername(token);
-        return username.equals(userDetails.getUsername())
+        return getUsername(token).equals(userDetails.getUsername())
                 && !getClaims(token).getExpiration().before(new Date());
     }
 }
