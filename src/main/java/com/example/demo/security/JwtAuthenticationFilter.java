@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        // ⚠️ Token validation will come here later
+        //  Token validation will come here later
         // For now, just pass request forward safely
 
         filterChain.doFilter(request, response);
