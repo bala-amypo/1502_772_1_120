@@ -1,19 +1,15 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.AuthRequestDto;
-import com.example.demo.dto.AuthResponseDto;
-import com.example.demo.dto.RegisterRequestDto;
+import com.example.demo.dto.*;
 import com.example.demo.entity.UserAccount;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.repository.UserAccountRepository;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.service.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -37,7 +33,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserAccount register(RegisterRequestDto dto) {
-
         if (userRepo.existsByEmail(dto.getEmail())) {
             throw new BadRequestException("Email already exists");
         }
@@ -52,19 +47,21 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto login(AuthRequestDto dto) {
-
         UserAccount user = userRepo.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole());
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.getEmail(),
+                        dto.getPassword()
+                )
+        );
 
-        String token = jwtUtil.generateToken(claims, user.getEmail());
+        String token = jwtUtil.generateToken(
+                java.util.Map.of("role", user.getRole()),
+                user.getEmail()
+        );
 
-        AuthResponseDto response = new AuthResponseDto();
-        response.setEmail(user.getEmail());
-        response.setToken(token);
-
-        return response;
+        return new AuthResponseDto(token);
     }
 }

@@ -11,6 +11,8 @@ public class UserAccount {
 
     private String email;
     private String password;
+
+    // SINGLE ROLE (tests expect String, not Set)
     private String role;
 
     public Long getId() {
@@ -40,7 +42,6 @@ public class UserAccount {
     public String getRole() {
         return role;
     }
-
     public void setRole(String role) {
         this.role = role;
     }
